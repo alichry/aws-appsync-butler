@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+      "target": "ES6",
+      "module": "CommonJs",
+      "moduleResolution": "node",
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "strict": true,
+      "forceConsistentCasingInFileNames": true,
+      "noFallthroughCasesInSwitch": true,
+      "declaration": true,
+      "noUncheckedIndexedAccess": true
+    },
+    "include": [
+      "src"
+    ]
+  }
