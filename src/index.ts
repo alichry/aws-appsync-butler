@@ -1,5 +1,6 @@
-export { default as SstVtlLoader } from "./SstVtlLoader";
-export { default as CdkVtlLoader } from './CdkVtlLoader';
-export { default as VtlBuilder } from './VtlBuilder';
-export { default as VtlReader } from './VtlReader';
+export { default as SstLoader } from "./loader/SstLoader";
+export { default as CdkLoader } from './loader/CdkLoader';
+export { default as Builder } from './builder/Builder';
+export { default as Reader } from './reader/Reader';
 export { getGraphqlFiles } from './utils';
+export { default as loadVtlResolvers } from './loader/loader';

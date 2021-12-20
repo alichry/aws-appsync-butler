@@ -1,7 +1,8 @@
-import AbstractVtlLoader from "./AbstractVtlLoader";
-import { SstVtlLoaderOptions, ResolverType } from "./types";
+import AbstractLoader from "./AbstractLoader";
+import type { SstLoaderOptions } from "./types";
+import { ResolverType } from '../reader/types';
 
-export default class SstVtlLoader extends AbstractVtlLoader<SstVtlLoaderOptions> {
+export default class SstLoader extends AbstractLoader<SstLoaderOptions> {
 
     protected loadResolvers() {
         Object.values(this.builder.resolvers).forEach(fields => {
@@ -10,7 +11,8 @@ export default class SstVtlLoader extends AbstractVtlLoader<SstVtlLoaderOptions>
                 this.api.addResolvers(this.scope, {
                     [`${resolver.typeName} ${resolver.fieldName}`]: {
                         dataSource: resolver.resolverType === ResolverType.Unit ? 
-                            this.defaultUnitResolverDs : "",
+                            (resolver.dataSource ? resolver.dataSource : this.defaultUnitResolverDs) : 
+                            "",
                         resolverProps
                     }
                 });

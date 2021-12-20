@@ -1,23 +1,22 @@
-import VtlReader from "./VtlReader";
-import type {
-    ResolverTree,
-    ResolverInfo,
-    FunctionInfo,
-    VtlReaderOptions,
-} from "./types";
+import type { ResolverTree } from "./types";
+import type { ParsedResolverInfo,
+    ParsedFunctionInfo,
+    ParserOptions
+} from '../parser/types';
+import Parser from "../parser/Parser";
 
 export default class VtlBuilder {
-    public readonly reader: VtlReader;
+    public readonly parser: Parser;
     public readonly resolvers: ResolverTree;
-    public readonly functions: Record<string, FunctionInfo>;
+    public readonly functions: Record<string, ParsedFunctionInfo>;
 
-    constructor(optionsOrRoot?: VtlReaderOptions | string) {
+    constructor(optionsOrRoot?: ParserOptions | string) {
         this.resolvers = {
             Query: {},
             Mutation: {}
         };
         this.functions = {};
-        this.reader = new VtlReader(optionsOrRoot);
+        this.parser = new Parser(optionsOrRoot);
     }
 
     public build() {
@@ -26,11 +25,11 @@ export default class VtlBuilder {
     }
 
     protected buildResolvers() {
-        const types = this.reader.readTypes();
+        const types = this.parser.readTypes();
         for (const typeName of types) {
-            const fields = this.reader.readFields(typeName);
+            const fields = this.parser.readFields(typeName);
             for (const fieldName of fields) {
-                const resolver = this.reader.readResolver(typeName, fieldName);
+                const resolver = this.parser.parseResolver(typeName, fieldName);
                 const type = this.createOrGetResolver(typeName);
                 type[fieldName] = resolver;
             }
@@ -38,14 +37,14 @@ export default class VtlBuilder {
     }
 
     protected buildFunctions() {
-        const functions = this.reader.readFunctions();
+        const functions = this.parser.readFunctions();
         for (const fn of functions) {
-            const func = this.reader.readFunction(fn);
+            const func = this.parser.parseFunction(fn);
             this.functions[fn] = func;
         }
     }
 
-    private createOrGetResolver(typeName: string): Record<string, ResolverInfo> {
+    private createOrGetResolver(typeName: string): Record<string, ParsedResolverInfo> {
         const existingType = this.resolvers[typeName];
         if (existingType) {
             return existingType;

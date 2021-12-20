@@ -1,9 +1,9 @@
-import AbstractVtlLoader from "./AbstractVtlLoader";
+import AbstractLoader from "./AbstractLoader";
 import { Resolver } from '@aws-cdk/aws-appsync';
-import type { CdkVtlLoaderOptions } from "./types";
-import { ResolverType } from "./types";
+import type { CdkLoaderOptions } from "./types";
+import { ResolverType } from "../reader/types";
 
-export default class CdkVtlLoader extends AbstractVtlLoader<CdkVtlLoaderOptions> {
+export default class CdkLoader extends AbstractLoader<CdkLoaderOptions> {
 
     protected loadResolvers() {
         Object.values(this.builder.resolvers).forEach(fields => {
@@ -14,7 +14,10 @@ export default class CdkVtlLoader extends AbstractVtlLoader<CdkVtlLoaderOptions>
                     ...this.getResolverProps(resolver)
                 }
                 if (resolver.resolverType === ResolverType.Unit) {
-                    this.defaultUnitResolverDs.createResolver(resolverProps)
+                    const dataSourrce = resolver.dataSource ?
+                        this.getDataSource(resolver.dataSource) :
+                        this.defaultUnitResolverDs;
+                    dataSourrce.createResolver(resolverProps)
                     return;
                 }
                 new Resolver(

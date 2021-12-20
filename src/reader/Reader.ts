@@ -5,24 +5,21 @@ import {
     validateFunctionDirectory
 } from './utils';
 import type {
-    VtlReaderOptions,
+    ReaderOptions,
     ResolverInfo,
-    FunctionInfo
+    FunctionInfo,
+    FileInfo
 } from "./types";
 import { ResolverType } from "./types";
-import { PipelineValidationError, UndefinedVariableError } from './errors';
 
-export default class VtlReader {
-    private readonly structure;
-    private readonly variables: Map<string, string> = new Map();
-    private static readonly variableNameRegExp = /^[a-zA-Z]+(_[a-zA-Z]+)*$/;
-    private static readonly variableRegExp = /{{[\s]*([a-zA-Z]+(_[a-zA-Z]+)*)[\s]*}}/g;
+export default class Reader {
+    protected readonly structure;
 
-    constructor(optionsOrRoot: VtlReaderOptions | string = {}) {
+    constructor(optionsOrRoot: ReaderOptions | string = {}) {
         if (typeof optionsOrRoot === "string") {
             optionsOrRoot = { structure: { root: optionsOrRoot }};
         }
-        const { structure, variables = {} } = optionsOrRoot;
+        const { structure } = optionsOrRoot;
         this.structure = {
             root: structure?.root || "vtl",
             resolvers: structure?.resolvers || "resolvers",
@@ -42,19 +39,6 @@ export default class VtlReader {
                 description: structure?.functionStructure?.description || "description.txt"
             }
         };
-        Object.keys(variables).forEach(key => this.setVariable(key, variables[key] as string));
-    }
-
-    public setVariable(key: string, value: string): this {
-        if (! VtlReader.variableNameRegExp.test(key)) {
-            throw new Error(`Invalid variable key! Got '${key}'`);
-        }
-        this.variables.set(key, value);
-        return this;
-    }
-
-    public getVariable(key: string): string | undefined {
-        return this.variables.get(key);
     }
 
     public readFunctions(): string[] {
@@ -70,14 +54,6 @@ export default class VtlReader {
     public readFields(typeName: string): string[] {
         const typePath = this.path(this.structure.resolvers, typeName);
         return this.readSubdirsSync(typePath);
-    }
-
-    public getResolverPath(typeName: string, fieldName: string): string {
-        return this.path(this.structure.resolvers, typeName, fieldName);
-    }
-
-    public getFunctionPath(functionName: string): string {
-        return this.path(this.structure.functions, functionName);
     }
 
     public readResolver(
@@ -105,28 +81,22 @@ export default class VtlReader {
                 typeName,
                 fieldName,
                 resolverType: ResolverType.Unit,
-                requestMappingTemplate: this.parseFile(join(resolverPath, request)),
-                responseMappingTemplate: this.parseFile(join(resolverPath, response))
+                requestMappingTemplate: this.formulateFileInfo(join(resolverPath, request)),
+                responseMappingTemplate: this.formulateFileInfo(join(resolverPath, response))
             };
         }
-        const hasBefore = resolverFiles.indexOf(before) !== -1;
-        const hasAfter = resolverFiles.indexOf(after) !== -1;
-        const pipelinePath = join(resolverPath, pipeline);
-        const pipelineDefinition = readFileSync(pipelinePath, "ascii").trim();
-        if (! pipelineDefinition) {
-            throw new PipelineValidationError(
-                "Pipeline sequence definition must not be empty.",
-                pipelinePath
-            );
-        }
+        const beforeMappingTemplatePath = resolverFiles.indexOf(before) !== -1 ?
+            join(resolverPath, before) : undefined;
+        const afterMappingTemplatePath = resolverFiles.indexOf(after) !== -1 ?
+            join(resolverPath, after) : undefined;
+        const pipelineDefinitionPath = join(resolverPath, pipeline);
         return {
             typeName,
             fieldName,
             resolverType:  ResolverType.Pipeline,
-            beforeMappingTemplate: hasBefore ? this.parseFile(join(resolverPath, before)) : undefined,
-            afterMappingTemplate: hasAfter ? this.parseFile(join(resolverPath, after)) : undefined,
-            pipelineDefinition,
-            functionSequence: pipelineDefinition.split("\n")
+            beforeMappingTemplate: this.formulateFileInfo(beforeMappingTemplatePath),
+            afterMappingTemplate: this.formulateFileInfo(afterMappingTemplatePath),
+            pipelineDefinition: this.formulateFileInfo(pipelineDefinitionPath)
         }
     }
 
@@ -138,43 +108,50 @@ export default class VtlReader {
             functionPath,
             [
                 { name: request, required: true },
-                { name: response, required: true},
+                { name: response, required: true },
                 { name: description, required: false }
             ]
         );
-        const hasDescription = functionFiles.indexOf(description) !== -1;
-        const requestMappingTemplate = this.parseFile(join(functionPath, request));
-        const responseMappingTemplate = this.parseFile(join(functionPath, response));
+        const descriptionPath = functionFiles.indexOf(description) !== -1 ?
+            join(functionPath, description) : undefined;
+        const requestPath = join(functionPath, request);
+        const responsePath = join(functionPath, response);
         return {
             name: functionName,
-            description: hasDescription ? readFileSync(join(functionPath, description), "ascii") : undefined,
-            requestMappingTemplate,
-            responseMappingTemplate
+            description: this.formulateFileInfo(descriptionPath),
+            requestMappingTemplate: this.formulateFileInfo(requestPath),
+            responseMappingTemplate: this.formulateFileInfo(responsePath)
         }
     }
 
-    private path(...args: string[]): string {
+    protected path(...args: string[]): string {
         return join(this.structure.root, ...args);
     }
 
-    private readSubdirsSync(dir: string): string[] {
+    protected readSubdirsSync(dir: string): string[] {
         return readdirSync(dir, { withFileTypes: true })
             .filter(e => e.isDirectory())
             .map(e => e.name);
     }
 
-    private parseFile(path: string): string {
-        const data = readFileSync(path, "ascii");
-        return data.replace(VtlReader.variableRegExp, (matched, varName: string) => {
-            const value = this.getVariable(varName);
-            if (typeof value === "undefined") {
-                throw new UndefinedVariableError(
-                    `Undefined variable '${varName}' was encountered. ` +
-                    "Make sure to populate the variables prior reading VTLs",
-                    path
-                );
-            }
-            return value;
-        });
+    protected getResolverPath(typeName: string, fieldName: string): string {
+        return this.path(this.structure.resolvers, typeName, fieldName);
+    }
+
+    protected getFunctionPath(functionName: string): string {
+        return this.path(this.structure.functions, functionName);
+    }
+
+    private formulateFileInfo(path: undefined): undefined;
+    private formulateFileInfo(path: string): FileInfo;
+    private formulateFileInfo(path?: string): FileInfo | undefined;
+    private formulateFileInfo(path?: string): FileInfo | undefined {
+        if (! path) {
+            return;
+        }
+        return {
+            path,
+            data: readFileSync(path, 'ascii')
+        };
     }
 }
