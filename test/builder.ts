@@ -20,7 +20,7 @@ describe('Test VTL builder with default and custom structure', function () {
         }
     ] as const;
 
-    builders.forEach(({ builder, type, structure }, i) => {
+    builders.forEach(({ builder, type, structure }) => {
         it(`Should build the tree correctly (${type})`, function () {
             builder.build();
 

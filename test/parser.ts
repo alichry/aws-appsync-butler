@@ -1,10 +1,10 @@
+import { expect } from 'chai';
+import _ from 'lodash';
 import Parser from '../src/parser/Parser';
 import { ParsedPipelineResolverInfo, ParsedUnitResolverInfo } from '../src/parser/types';
 import { InvalidDirectiveError, PipelineValidationError, UndefinedVariableError } from '../src/parser/errors';
 import { ResolverType } from '../src/reader/types';
 import { invalidCustomStructure, validDefaultStructure, validCustomStructure, invalidDefaultRoot, validDefaultRoot } from './constants';
-import { expect } from 'chai';
-import _ from 'lodash';
 
 describe('Test parser validations with default and custom structures', function () {
     const parsers = [
@@ -20,7 +20,7 @@ describe('Test parser validations with default and custom structures', function 
         }
     ] as const;
     
-    parsers.forEach(({ parser, type }, i) => {
+    parsers.forEach(({ parser, type }) => {
         it(`Should throw an error when an undefined variable is used (${type})`, function () {
             expect(() => parser.parseFunction('UndefinedVariable'))
                 .to.throw(UndefinedVariableError, /Undefined variable 'undefinedVaraible' was encountered/i);
@@ -83,7 +83,7 @@ describe('Test VTL file parsing with default and custom structures', function ()
         }
     ] as const;
 
-    parsers.forEach(({ parser, type, structure }, i) => {
+    parsers.forEach(({ parser, type, structure }) => {
         it(`Should parse unit resolver files (${type})`, function () {
             const unitResolver = parser.parseResolver("Variable", "unit") as ParsedUnitResolverInfo;
             expect(unitResolver.resolverType).equals(ResolverType.Unit);

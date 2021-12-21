@@ -17,7 +17,7 @@ export enum VtlFileType {
     Response = 'Response Mapping Template',
     Before = 'Before Mapping Template',
     After = 'After Mapping Template'
-};
+}
 
 export interface ParsedUnitResolverInfo extends UnitResolverInfo {
     dataSource?: string;

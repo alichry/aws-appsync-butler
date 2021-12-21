@@ -1,25 +1,23 @@
-import Reader from '../src/reader/Reader';
 import { expect } from 'chai';
+import _ from 'lodash';
+import Reader from '../src/reader/Reader';
 import { DirectoryValidationError } from '../src/reader/errors';
 import { PipelineResolverInfo, ResolverType, UnitResolverInfo } from '../src/reader/types';
-import { invalidCustomStructure, validDefaultStructure, validCustomStructure, invalidDefaultRoot, invalidDefaultStructure, validDefaultRoot } from './constants';
-import _ from 'lodash';
+import { invalidCustomStructure, validDefaultStructure, validCustomStructure, invalidDefaultRoot, validDefaultRoot } from './constants';
 
 describe('Test VTL directory validation with default and custom structures', function () {
     const readers = [
         {
             reader: new Reader(invalidDefaultRoot),
-            type: "default",
-            structure: invalidDefaultStructure
+            type: "default"
         },
         {
             reader: new Reader({ structure: _.cloneDeep(invalidCustomStructure) }),
-            type: "custom",
-            structure: invalidCustomStructure
+            type: "custom"
         }
     ] as const;
 
-    readers.forEach(({ reader, type, structure }, i) => {
+    readers.forEach(({ reader, type }) => {
         it(`Should throw an errror for overlapping file types (required file, ${type})`, function () {
             expect(() => reader.readResolver('Overlap', 'pipeline'))
                 .to.throw(DirectoryValidationError, /overlapping file types/);
@@ -76,7 +74,7 @@ describe('Test VTL file reading with default and custom structures', function ()
         }
     ] as const;
 
-    readers.forEach(({ reader, type, structure }, i) => {
+    readers.forEach(({ reader, type, structure }) => {
         it(`Should read unit resolver files (${type})`, function () {
             const resolver = reader.readResolver("Variable", "unit") as UnitResolverInfo;
             expect(resolver.resolverType).equals(ResolverType.Unit);

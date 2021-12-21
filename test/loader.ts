@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 import { Template, Match } from '@aws-cdk/assertions';
 import { CfnDataSource, GraphqlApi } from '@aws-cdk/aws-appsync';
-import { ParsedPipelineResolverInfo, ParsedUnitResolverInfo, ParserOptions } from '../src/parser/types';
+import _ from 'lodash';
+import { ParsedPipelineResolverInfo, ParsedUnitResolverInfo } from '../src/parser/types';
 import { loadCdk, loadSst } from './utilts';
 import { AppSyncApi as SstAppSyncApi } from '@serverless-stack/resources';
 import ValidationError from '../src/ValidationError';
 import { invalidCustomStructure, invalidDefaultRoot, validCustomStructure, validDefaultRoot } from './constants';
-import _ from 'lodash';
 
 const message = "Ciao";
 const validCases = [
@@ -60,14 +60,14 @@ const directivesResponse = `Response is ${message}`;
 
 describe('Test VTL loading into SST and CDK using default and custom structures', function () {
     (["CDK", "SST"] as const).forEach(ias => {
-        invalidCases.forEach(({ options, type }, i) => {
+        invalidCases.forEach(({ options, type }) => {
             it(`Should throw an error when loading into ${ias} using an invalid structure (${type})`, function () {
                 expect(() => ias === "SST" ? loadSst(options) : loadCdk(options))
                     .to.throw(ValidationError);
             });
         });
         
-        validCases.forEach(({ options, type }, i) => {
+        validCases.forEach(({ options, type }) => {
             it(`Should build resolvers when using ${ias} (${type})`, function () {
                 const { loader } = ias === "SST" ? loadSst(options) : loadCdk(options);
                 const pipelineResolver = loader.builder.resolvers.Variable?.pipeline as ParsedPipelineResolverInfo;
