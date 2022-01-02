@@ -6,5 +6,6 @@
     "categoryOrder": ["Service", "*"],
     "categorizeByGroup": true,
     "sort": ["visibility", "static-first", "source-order", "alphabetical"],
-    "disableSources": true
+    "disableSources": true,
+    "publicPath": "/api/"
 }
