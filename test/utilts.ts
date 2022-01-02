@@ -1,9 +1,10 @@
-import loadVtlResolvers from '../src/loader/loader';
+import { createLoader } from '../src/loader/utils';
 import * as sst from "@serverless-stack/resources";
 import * as cdk from '@aws-cdk/core';
 import { Table, AttributeType } from '@aws-cdk/aws-dynamodb';
 import { GraphqlApi } from '@aws-cdk/aws-appsync';
 import { ReaderOptions } from '../src/reader/types';
+import { CdkLoaderOptions, SstLoaderOptions } from '../src/loader/types';
 
 class SstDummyStack extends sst.Stack {}
 class CdkDummyStack extends cdk.Stack {}
@@ -29,14 +30,15 @@ const createSstDummyStackAndAppsyncApi = () => {
     };
 }
 
-export const loadSst = (opts: ReaderOptions) => {
+export const loadSst = (opts: SstLoaderOptions | ReaderOptions, noDefault = false) => {
     const { dummyStack, api, dynamoDbTable, secondaryDynamoDbTable } = createSstDummyStackAndAppsyncApi();
-    const loader = loadVtlResolvers(dummyStack, {
+    const loader = createLoader(dummyStack, {
         api,
-        defaultFunctionDataSource: "myTable",
-        defaultUnitResolverDataSource: "myTable",
+        defaultFunctionDataSource: noDefault ? undefined : "myTable",
+        defaultUnitResolverDataSource: noDefault ? undefined : "myTable",
         ...opts
     });
+    loader.load();
     return {
         dummyStack,
         api,
@@ -46,7 +48,7 @@ export const loadSst = (opts: ReaderOptions) => {
     };
 }
 
-export const loadCdk = (opts:ReaderOptions) => {
+export const loadCdk = (opts: CdkLoaderOptions | ReaderOptions, noDefault = false) => {
     const dummyStack = new CdkDummyStack();
     const table = new Table(dummyStack, "dummyTable", {
         partitionKey: { name: "pk", type: AttributeType.STRING }
@@ -57,14 +59,15 @@ export const loadCdk = (opts:ReaderOptions) => {
     const api = new GraphqlApi(dummyStack, "appsync", { name: "dummyApi" });
     const ds = api.addDynamoDbDataSource("myTable", table);
     const secondaryDs = api.addDynamoDbDataSource("test", secondaryTable);
-    const loader = loadVtlResolvers(dummyStack, {
+    const loader = createLoader(dummyStack, {
         api,
-        defaultFunctionDataSource: ds,
-        defaultUnitResolverDataSource: ds,
+        defaultFunctionDataSource: noDefault ? undefined : ds,
+        defaultUnitResolverDataSource: noDefault ? undefined : ds,
         dataSources: {
             test: secondaryDs
         },
         ...opts
     });
+    loader.load();
     return { dummyStack, api, loader, dynamoDbTable: table, secondaryDynamoDbTable: secondaryTable };
 }

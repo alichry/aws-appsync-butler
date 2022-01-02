@@ -1,5 +1,8 @@
 import ValidationError from "../ValidationError";
 
+/**
+ * @category Error
+ */
 export class DataSourceTypeMismatchError extends ValidationError {
     public readonly dataSource: unknown;
 
@@ -12,6 +15,9 @@ export class DataSourceTypeMismatchError extends ValidationError {
     }
 }
 
+/**
+ * @category Error
+ */
 export class DataSourceNotFoundError extends ValidationError {
     public readonly dataSource: string;
     
@@ -24,6 +30,9 @@ export class DataSourceNotFoundError extends ValidationError {
     }
 }
 
+/**
+ * @category Error
+ */
 export class FunctionNotFoundError extends ValidationError {
     public readonly functionName: string;
     

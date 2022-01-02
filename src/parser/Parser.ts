@@ -17,6 +17,20 @@ import { InvalidDirectiveError,
     PipelineValidationError
 } from "./errors";
 
+/**
+ * Resolver and function parser.
+ * ```ts
+ * import { Parser } from 'aws-appsync-butler';
+ * 
+ * const parser = new Parser();
+ * parser.readTypes(); // ['Query', 'Mutation', 'Post']
+ * parser.readFields('Query'); // ['getPost', 'getAuthor']
+ * const resolver = parser.parseResolver('Query', 'getPost');
+ * 
+ * parser.readFunctions(); // ['getPostById', 'getAuthorByPostId']
+ * const func = reader.parseFunction('getPostById');
+ * ```
+ */
 export default class Parser extends Reader {
     private readonly variables: Map<string, string> = new Map();
     private static readonly butlerReferenceRegExp = /^##[\s]*@butler\.(.*)$/gim;
@@ -24,6 +38,9 @@ export default class Parser extends Reader {
     private static readonly variableNameRegExp = /^[a-zA-Z]+(_[a-zA-Z]+)*$/;
     private static readonly variableRegExp = /{{[\s]*([a-zA-Z]+(_[a-zA-Z]+)*)[\s]*}}/g;
 
+    /**
+     * @param optionsOrRoot Path to VTL directory or parsing directives.
+     */
     constructor(optionsOrRoot: ParserOptions | string = {}) {
         super(optionsOrRoot);
         if (typeof optionsOrRoot === "string") {
@@ -33,6 +50,38 @@ export default class Parser extends Reader {
         Object.keys(variables).forEach(key => this.setVariable(key, variables[key] as string));
     }
 
+    /**
+     * Sets an in-memory variable for VTL file parsing.
+     * ```vtl title="vtl/resolvers/Mutation/addPost/request.vtl"
+     * #set($postId = $util.autoId())
+     *
+     * {
+     *     "version" : "2018-05-29",
+     *     "operation" : "BatchPutItem",
+     *     "tables": {
+     *         "{{ tableName }}": [
+     *             {
+     *                 "pk": $util.dynamodb.toDynamoDBJson("p-$postId"),
+     *                 "sk": $util.dynamodb.toDynamoDBJson("A"),
+     *                 "postTitle": $util.dynamodb.toDynamoDBJson($ctx.args.postInput.title),
+     *                 "postContent": $util.dynamodb.toDynamoDBJson($ctx.args.postInput.content)
+     *             },
+     *             {
+     *                 "pk": $util.dynamodb.toDynamoDBJson("u-$ctx.identity.sub"),
+     *                 "sk": $util.dynamodb.toDynamoDBJson("p-$postId")
+     *             }
+     *         ]
+     *     }
+     * }
+     * ```
+     * ```ts
+     * parser.setVariable("tableName", dynamodbTable.tableName);
+     * const resolver = parser.parseResolver('Mutation', 'addPost');
+     * ```
+     * @param key Variable identifier
+     * @param value Value
+     * @returns {this}
+     */
     public setVariable(key: string, value: string): this {
         if (! Parser.variableNameRegExp.test(key)) {
             throw new Error(`Invalid variable key! Got '${key}'`);
@@ -41,10 +90,27 @@ export default class Parser extends Reader {
         return this;
     }
 
+    /**
+     * Retrieves the defined variable value.
+     * ```ts
+     * parser.setVariable('name', 'Ali');
+     * parser.getVariable('name'); // 'Ali'
+     * ```
+     * @param key Variable identifier
+     * @returns Variable value if set, undefined otherwise.
+     */
     public getVariable(key: string): string | undefined {
         return this.variables.get(key);
     }
 
+    /**
+     * Parses Resolver files including variable substitution in
+     * mapping templates, pipeline sequence defintion parsing,
+     * and data source binding.
+     * @param typeName GraphQL type name
+     * @param fieldName GraphQL field name
+     * @returns Parsed resolver information
+     */
     public parseResolver(
         typeName: string,
         fieldName: string
@@ -56,6 +122,12 @@ export default class Parser extends Reader {
         return this.parsePipelineResolverInfo(resolver);
     }
 
+    /**
+     * Parses function files including variable substitution in
+     * mapping templates and data source binding.
+     * @param functionName Function name
+     * @returns Parsed function information
+     */
     public parseFunction(functionName: string): ParsedFunctionInfo {
         const func = this.readFunction(functionName);
         const { data: parsedRequest, dataSource } = this.parseFile(

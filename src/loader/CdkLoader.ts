@@ -1,34 +1,26 @@
-import AbstractLoader from "./AbstractLoader";
-import { Resolver } from '@aws-cdk/aws-appsync';
+import Loader from "./Loader";
 import type { CdkLoaderOptions } from "./types";
-import { ResolverType } from "../reader/types";
 
-export default class CdkLoader extends AbstractLoader<CdkLoaderOptions> {
-
-    protected loadResolvers() {
-        Object.values(this.builder.resolvers).forEach(fields => {
-            Object.values(fields).forEach(resolver => {
-                const resolverProps = {
-                    typeName: resolver.typeName,
-                    fieldName: resolver.fieldName,
-                    ...this.getResolverProps(resolver)
-                }
-                if (resolver.resolverType === ResolverType.Unit) {
-                    const dataSourrce = resolver.dataSource ?
-                        this.getDataSource(resolver.dataSource) :
-                        this.defaultUnitResolverDs;
-                    dataSourrce.createResolver(resolverProps)
-                    return;
-                }
-                new Resolver(
-                    this.scope,
-                    `appsync:pipeline:${resolver.typeName}:${resolver.fieldName}`, 
-                    {
-                        api: this.api,
-                        ...resolverProps
-                    }
-                );
-            })
-        });
-    }
-}
+/**
+ * Load resolvers into an AppSync GraphQL API construct.
+ * 
+ * ```ts
+ * import { CdkLoader } from 'aws-appsync-butler';
+ * import { GraphqlApi } from '@aws-cdk/aws-appsync';
+ * import { Table } from '@aws-cdk/aws-dynamodb';
+ * 
+ * const graphqlApi = new GraphqlApi(...);
+ * const table = new Table(...);
+ * 
+ * const loader = new CdkLoader(appStack, {
+ *   api: graphqlApi,
+ *   defaultUnitResolverDataSource: table,
+ *   defaultFunctionDataSource: 'none',
+ *   variables: {
+ *     tableName: table.tableName
+ *   }
+ * });
+ * loader.load();
+ * ```
+ */
+export default class CdkLoader extends Loader<CdkLoaderOptions> { }

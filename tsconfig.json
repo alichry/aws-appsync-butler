@@ -9,7 +9,8 @@
       "forceConsistentCasingInFileNames": true,
       "noFallthroughCasesInSwitch": true,
       "declaration": true,
-      "noUncheckedIndexedAccess": true
+      "noUncheckedIndexedAccess": true,
+      "strictNullChecks": true
     },
     "include": [
       "src"

@@ -34,5 +34,9 @@ export interface ParsedFunctionInfo extends FunctionInfo {
 }
 
 export interface ParserOptions extends ReaderOptions {
+    /**
+     * Variables to replace in VTL files. See 
+     * [Parser#setvariable](/docs/api/classes/Parser#setvariable) for sample usage
+     */
     variables?: Record<string, string>;
 }

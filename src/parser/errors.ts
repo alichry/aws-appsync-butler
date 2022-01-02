@@ -1,5 +1,8 @@
 import ValidationError from "../ValidationError";
 
+/**
+ * @category Error
+ */
 export class PipelineValidationError extends ValidationError {
     public readonly filePath: string;
     
@@ -12,6 +15,9 @@ export class PipelineValidationError extends ValidationError {
     }
 }
 
+/**
+ * @category Error
+ */
 export class UndefinedVariableError extends ValidationError {
     public readonly filePath: string;
 
@@ -24,6 +30,9 @@ export class UndefinedVariableError extends ValidationError {
     }
 }
 
+/**
+ * @category Error
+ */
 export class InvalidDirectiveError extends ValidationError {
     public readonly directive: string;
     public readonly filePath: string;

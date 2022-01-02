@@ -1,5 +1,8 @@
 import ValidationError from "../ValidationError";
 
+/**
+ * @category Error
+ */
 export class DirectoryValidationError extends ValidationError {
     public readonly directory: string;
 

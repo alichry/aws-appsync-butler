@@ -12,9 +12,26 @@ import type {
 } from "./types";
 import { ResolverType } from "./types";
 
+/**
+ * Resolver and function reader.
+ * 
+ * ```ts
+ * import { Reader } from 'aws-appsync-butler';
+ * const reader = new Reader();
+ * reader.readTypes(); // ['Query', 'Mutation', 'Post']
+ * reader.readFields('Query'); // ['getPost', 'getAuthor']
+ * const resolver = reader.readResolver('Query', 'getPost');
+ * 
+ * reader.readFunctions(); // ['getPostById', 'getAuthorByPostId']
+ * const func = reader.readFunction('getPostById');
+ * ```
+ */
 export default class Reader {
     protected readonly structure;
 
+    /**
+     * @param optionsOrRoot Path to VTL directory or reading directives
+     */
     constructor(optionsOrRoot: ReaderOptions | string = {}) {
         if (typeof optionsOrRoot === "string") {
             optionsOrRoot = { structure: { root: optionsOrRoot }};
@@ -41,21 +58,78 @@ export default class Reader {
         };
     }
 
+    /**
+     * Reads the on-disk function directory names. Essentially, the
+     * first-level subdirectories of `functions` are read.
+     * ```tree
+     * vtl
+     * ├── functions
+     * │   └── GetPostById
+     * │       ├── request.vtl
+     * │       └── response.vtl
+     * └── resolvers
+     * ```
+     * ```ts
+     * reader.readFunctions(); // ['GetPostById']
+     * ```
+     * @returns A list of function names
+     */
     public readFunctions(): string[] {
         const functionsPath = this.path(this.structure.functions);
-        return this.readSubdirsSync(functionsPath);
+        return this.readSubdirsSync(functionsPath, true);
     }
 
+    /**
+     * Reads the on-disk GraphQL type names. Essentially, the
+     * first-level subdirectories of `resolvers` are read.
+     * ```tree
+     * vtl
+     * ├── functions
+     * └── resolvers
+     *     ├── Mutation
+     *     └── Query
+     *     └── Post
+     * ```
+     * ```ts
+     * reader.readTypes(); // ['Mutation', 'Query', 'Post']
+     * ```
+     * @returns A list of GraphQL types
+     */
     public readTypes(): string[] {
         const resolversPath = this.path(this.structure.resolvers);
-        return this.readSubdirsSync(resolversPath);
+        return this.readSubdirsSync(resolversPath, true);
     }
 
+    /**
+     * Reads the on-disk GraphQL field names. Essentially, the
+     * second-level subdirectories of `resolvers` are read.
+     * ```tree
+     * vtl
+     * ├── functions
+     * └── resolvers
+     *     ├── Mutation
+     *     └── Query
+     *         └── getPost
+     *             ├── request.vtl
+     *             └── response.vtl
+     * ```
+     * ```ts
+     * reader.readFields('Query'); // ['getPost']
+     * ```
+     * @param typeName GraphQL type name
+     * @returns A list of GraphQL fields
+     */
     public readFields(typeName: string): string[] {
         const typePath = this.path(this.structure.resolvers, typeName);
         return this.readSubdirsSync(typePath);
     }
 
+    /**
+     * Reads a GraphQL field resolver from disk.
+     * @param typeName GraphQL type name
+     * @param fieldName GraphQL field name
+     * @returns Unit or Pipeline Resolver information
+     */
     public readResolver(
         typeName: string,
         fieldName: string
@@ -100,6 +174,11 @@ export default class Reader {
         }
     }
 
+    /**
+     * Reads an AWS AppSync Function from disk.
+     * @param functionName Function name
+     * @returns Function information
+     */
     public readFunction(functionName: string): FunctionInfo {
         const functionPath = this.getFunctionPath(functionName);
         const { request, response, description } = this.structure.functionStructure;
@@ -128,10 +207,21 @@ export default class Reader {
         return join(this.structure.root, ...args);
     }
 
-    protected readSubdirsSync(dir: string): string[] {
-        return readdirSync(dir, { withFileTypes: true })
-            .filter(e => e.isDirectory())
-            .map(e => e.name);
+    protected readSubdirsSync(dir: string, ignoreNoent = false): string[] {
+        try {
+            return readdirSync(dir, { withFileTypes: true })
+                .filter(e => e.isDirectory())
+                .map(e => e.name);
+        } catch (e) {
+            if (
+                ignoreNoent &&
+                typeof e === "object" &&
+                (<Record<string, unknown>>e)?.code === 'ENOENT'
+            ) {
+                return [];
+            }
+            throw e;
+        }
     }
 
     protected getResolverPath(typeName: string, fieldName: string): string {

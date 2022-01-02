@@ -1,16 +1,18 @@
 {
   "name": "aws-appsync-butler",
-  "version": "0.0.1",
-  "description": "Parse saved VTL resolvers and functions into AppSync CDK or SST constructs 🚀 Highly-suitable for Single Table design.",
-  "author": "Ali Cherry <ctfoss@alicherry.net>",
-  "main": "dist/index.js",
+  "version": "0.1.0",
+  "description": "A simple yet powerful AppSync development framework. Compatible with CDK and SST. 🚀 Highly-suitable for Single Table design applications.",
+  "author": "Ali Cherry <ctfoss+appsync-butler@alicherry.net>",
+  "homepage": "https://alichry.github.io/aws-appsync-butler/",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "license": "MIT",
   "files": [
-    "dist"
+    "lib"
   ],
   "scripts": {
     "lint": "eslint . --ext .ts",
-    "transpile": "tsc --project . --outDir dist",
+    "transpile": "tsc --project . --outDir lib",
     "build": "npm-run-all lint transpile",
     "test": "mocha --loader=ts-node/esm 'test/**/*.{ts,js}'"
   },
@@ -22,7 +24,6 @@
     "@types/chai": "^4.3.0",
     "@types/lodash": "^4.14.178",
     "@types/node": "^16.11.12",
-    "@types/yup": "^0.29.13",
     "@typescript-eslint/eslint-plugin": "^5.7.0",
     "@typescript-eslint/parser": "^5.7.0",
     "chai": "^4.3.4",
@@ -34,12 +35,22 @@
     "ts-node": "^10.4.0",
     "typescript": "^4.5.4"
   },
-  "dependencies": {
-    "yup": "1.0.0-alpha.2"
-  },
+  "dependencies": {},
   "peerDependencies": {
+    "@aws-cdk/aws-appsync": "^1.0",
     "@aws-cdk/core": "^1.0",
     "@serverless-stack/cli": "0.x",
     "@serverless-stack/resources": "0.x"
-  }
+  },
+  "keywords": [
+    "appsync-butler",
+    "appsync",
+    "resolver",
+    "graphql",
+    "aws",
+    "aws-appsync",
+    "aws-cdk",
+    "serverless-stack",
+    "serverless-stack-toolkit"
+  ]
 }

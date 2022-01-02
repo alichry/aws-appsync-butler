@@ -7,6 +7,7 @@ import { loadCdk, loadSst } from './utilts';
 import { AppSyncApi as SstAppSyncApi } from '@serverless-stack/resources';
 import ValidationError from '../src/ValidationError';
 import { invalidCustomStructure, invalidDefaultRoot, validCustomStructure, validDefaultRoot } from './constants';
+import { DataSourceNotFoundError } from '../src/loader/errors';
 
 const message = "Ciao";
 const validCases = [
@@ -182,6 +183,111 @@ describe('Test VTL loading into SST and CDK using default and custom structures'
                     DataSourceName: "test",
                     RequestMappingTemplate: directivesRequest,
                     ResponseMappingTemplate: directivesResponse
+                });
+            });
+
+            it(`Should throw an error when a default data source is required when using ${ias} (${type})`, function () {
+                expect(() => ias === "SST" ? loadSst(options, true) : loadCdk(options, true))
+                    .to.throw(DataSourceNotFoundError, /No default (function|unit resolver) data source was provided/i)
+            });
+
+            it(`Should throw an error when a default function data source is required when using ${ias} (${type})`, function () {
+                expect(() => {
+                    if (ias === "SST") {
+                        loadSst({
+                            ...options,
+                            structure: { ...options.structure, root: `test/cases/valid/defaultFunctionDataSource/${type}` }
+                        }, true);
+                        return;
+                    }
+                    loadCdk({
+                        ...options,
+                        structure: { ...options.structure, root: `test/cases/valid/defaultFunctionDataSource/${type}` }
+                    }, true);
+                }).to.throw(DataSourceNotFoundError, /No default function data source was provided/i)
+            });
+
+            it(`Should throw an error when a default unit resolver data source is required when using ${ias} (${type})`, function () {
+                expect(() => {
+                    if (ias === "SST") {
+                        loadSst({
+                            ...options,
+                            structure: { ...options.structure, root: `test/cases/valid/defaultUnitDataSource/${type}` }
+                        }, true);
+                        return;
+                    }
+                    loadCdk({
+                        ...options,
+                        structure: { ...options.structure, root: `test/cases/valid/defaultUnitDataSource/${type}` }
+                    }, true);
+                }).to.throw(DataSourceNotFoundError, /No default unit resolver data source was provided/i)
+            });
+
+            it(`Should use 'none' as a default function data source when using ${ias} (${type})`, function () {
+                let beans: ReturnType<typeof loadSst | typeof loadCdk>;
+                if (ias === "SST") {
+                    beans = loadSst({
+                        ...options,
+                        structure: { ...options.structure, root: `test/cases/valid/defaultFunctionDataSource/${type}` },
+                        defaultFunctionDataSource: 'none',
+                    });
+                } else {
+                    beans = loadCdk({
+                        ...options,
+                        structure: { ...options.structure, root: `test/cases/valid/defaultFunctionDataSource/${type}` },
+                        defaultFunctionDataSource: 'none',
+                    });
+                }
+                const graphqlApi = beans.api instanceof SstAppSyncApi ? beans.api.graphqlApi : beans.api;
+                const template = Template.fromStack(beans.dummyStack);
+                template.resourceCountIs('AWS::AppSync::DataSource', 3);
+                template.hasResourceProperties('AWS::AppSync::DataSource', {
+                    ApiId: beans.dummyStack.resolve(graphqlApi.apiId),
+                    Name: 'none',
+                    Type: 'NONE'
+                });
+                template.resourceCountIs('AWS::AppSync::FunctionConfiguration', 1);
+                template.hasResourceProperties('AWS::AppSync::FunctionConfiguration', {
+                    ApiId: beans.dummyStack.resolve(graphqlApi.apiId),
+                    Name: 'defaultDs',
+                    DataSourceName: "none",
+                    RequestMappingTemplate: unitDefaultRequest,
+                    ResponseMappingTemplate: unitDefaultResponse
+                });
+            });
+
+            it(`Should use 'none' as a default unit resolver data source when using ${ias} (${type})`, function () {
+                let beans: ReturnType<typeof loadSst | typeof loadCdk>;
+                if (ias === "SST") {
+                    beans = loadSst({
+                        ...options,
+                        structure: { ...options.structure, root: `test/cases/valid/defaultUnitDataSource/${type}` },
+                        defaultUnitResolverDataSource: 'none',
+                    });
+                } else {
+                    beans = loadCdk({
+                        ...options,
+                        structure: { ...options.structure, root: `test/cases/valid/defaultUnitDataSource/${type}` },
+                        defaultUnitResolverDataSource: 'none',
+                    });
+                }
+                const graphqlApi = beans.api instanceof SstAppSyncApi ? beans.api.graphqlApi : beans.api;
+                const template = Template.fromStack(beans.dummyStack);
+                template.resourceCountIs('AWS::AppSync::DataSource', 3);
+                template.hasResourceProperties('AWS::AppSync::DataSource', {
+                    ApiId: beans.dummyStack.resolve(graphqlApi.apiId),
+                    Name: 'none',
+                    Type: 'NONE'
+                });
+                template.resourceCountIs('AWS::AppSync::Resolver', 1);
+                template.hasResourceProperties('AWS::AppSync::Resolver', {
+                    ApiId: beans.dummyStack.resolve(graphqlApi.apiId),
+                    TypeName: 'Query',
+                    FieldName: 'defaultDs',
+                    Kind: 'UNIT',
+                    DataSourceName: "none",
+                    RequestMappingTemplate: unitDefaultRequest,
+                    ResponseMappingTemplate: unitDefaultResponse
                 });
             });
         });

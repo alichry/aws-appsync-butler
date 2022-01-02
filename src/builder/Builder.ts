@@ -5,11 +5,38 @@ import type { ParsedResolverInfo,
 } from '../parser/types';
 import Parser from "../parser/Parser";
 
-export default class VtlBuilder {
+/**
+ * Build a resolver tree from a VTL directory.
+ * 
+ * ```ts
+ * import { Builder } from 'aws-appsync-butler';
+ * const builder = new Builder();
+ * builder.build();
+ * const { getPost } = builder.resolvers.Query;
+ * const { getUserById } = builder.functions;
+ * ```
+ */
+export default class Builder {
+    /**
+     * The underlying parser instance that is responsible for parsing
+     * resolvers and functions.
+     */
     public readonly parser: Parser;
+
+    /**
+     * The resolver tree object, only populated after calling `build()`
+     */
     public readonly resolvers: ResolverTree;
+
+    /**
+     * The function dictionary object, only populated after calling `build()`
+     * Keys are function names and values are parsed function information.
+     */
     public readonly functions: Record<string, ParsedFunctionInfo>;
 
+    /**
+     * @param optionsOrRoot Path to VTL directory or parsing instructions
+     */
     constructor(optionsOrRoot?: ParserOptions | string) {
         this.resolvers = {
             Query: {},
@@ -19,6 +46,10 @@ export default class VtlBuilder {
         this.parser = new Parser(optionsOrRoot);
     }
 
+    /**
+     * Traverse all the stored resolvers and functions to
+     * build the resolver tree and function dictionary.
+     */
     public build() {
         this.buildResolvers();
         this.buildFunctions();

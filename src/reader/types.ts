@@ -1,18 +1,24 @@
+/**
+ * @internal
+ */
 export interface DirectoryFileDefinition {
     name: string;
     required: boolean;
 }
 
-export enum ResolverType {
-    Unit = "Unit",
-    Pipeline = "Pipeline"
-}
-
+/**
+ * @internal
+ */
 export enum ResolverDirectoryFlags {
     Empty = 0,
     HasUnitResolverFiles = 1,
     HasPipelineResolverFiles = 2,
     HasUnitAndPipelineResolverFiles = 3
+}
+
+export enum ResolverType {
+    Unit = "Unit",
+    Pipeline = "Pipeline"
 }
 
 export interface BaseResolverInfo {
@@ -22,7 +28,13 @@ export interface BaseResolverInfo {
 }
 
 export interface FileInfo {
+    /**
+     * Path to file
+     */
     path: string;
+    /**
+     * File content
+     */
     data: string;
 }
 
@@ -48,14 +60,29 @@ export interface FunctionInfo {
     responseMappingTemplate: FileInfo;
 }
 
-interface UnitDirectoryStructure {
+export interface UnitDirectoryStructure {
+    /**
+     * File name of the request mapping template.
+     */
     request?: string;
+    /**
+     * File name of the response mapping template.
+     */
     response?: string;
 }
 
-interface PipelineDirectoryStructure {
+export interface PipelineDirectoryStructure {
+    /**
+     * File name of the before mapping template.
+     */
     before?: string;
+    /**
+     * File name of the pipeline definition file.
+     */
     pipeline?: string;
+    /**
+     * File name of the after mapping template.
+     */
     after?: string;
 }
 
@@ -64,11 +91,29 @@ interface FunctionDirectoryStructure extends UnitDirectoryStructure {
 }
 
 export interface DirectoryStructure {
+    /**
+     * Path to the VTL root directory
+     */
     root?: string;
+    /**
+     * Directory name of the resolvers directory.
+     */
     resolvers?: string;
+    /**
+     * Directory name of the functions directory.
+     */
     functions?: string;
+    /**
+     * Unit resolver directory structure.
+     */
     unitStructure?: UnitDirectoryStructure;
+    /**
+     * Pipeline resolver directory structure.
+     */
     pipelineStructure?: PipelineDirectoryStructure;
+    /**
+     * Function directory structure.
+     */
     functionStructure?: FunctionDirectoryStructure;
 }
 
