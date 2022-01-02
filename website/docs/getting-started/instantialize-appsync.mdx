@@ -1,0 +1,50 @@
+---
+sidebar_position: 5
+---
+
+# Instantialize AppSync
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+It's time to create an AppSync CDK/SST construct, if not yet created.
+
+<Tabs>
+  <TabItem value="Serverless Stack Toolkit">
+
+```ts title="stacks/MyStack.ts"
+import * as sst from "@serverless-stack/resources";
+
+export default class MyStack extends sst.Stack {
+  constructor(scope: sst.App, id: string, props: sst.StackProps) {
+    super(scope, id, props);
+
+    const api = new sst.AppSyncApi(this, "api", {
+      graphqlApi: { schema: "graphql/index.graphql" }
+    });
+  }
+}
+```
+
+  </TabItem>
+  <TabItem value="AWS Cloud Development Kit">
+
+```ts title="lib/app-stack.ts"
+import { Stack, StackProps } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import { GraphqlApi } from '@aws-cdk/aws-appsync';
+
+export class AppStack extends Stack {
+  constructor(scope: Construct, id: string, props?: StackProps) {
+    super(scope, id, props);
+
+    // The code that defines your stack goes here
+
+    const api = new GraphqlApi(this, "api", {
+      name: "time-pingpong-api"
+    });
+  }
+}
+```
+  </TabItem>
+</Tabs>

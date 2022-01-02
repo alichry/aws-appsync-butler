@@ -1,0 +1,28 @@
+---
+sidebar_position: 7
+---
+
+# Deploy stack
+
+**Our** stack is ready for deployment. Follow the deployment instructions provided by [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/cli.html#cli-deploy) or [SST](https://docs.serverless-stack.com/deploying-your-app).
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs>
+  <TabItem value="Serverless Stack Toolkit">
+
+```shell
+yarn sst deploy
+```
+
+  </TabItem>
+  <TabItem value="AWS Cloud Development Kit">
+
+```shell
+yarn cdk deploy
+```
+  </TabItem>
+</Tabs>
+
+Once the stack is deployed, we can execute GraphQL operations.

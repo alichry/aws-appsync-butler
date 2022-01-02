@@ -1,0 +1,82 @@
+---
+sidebar_position: 8
+---
+
+# Run GraphQL operations
+
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+export const Row = ({ children }) => (
+    <div className="container">
+        <div className="row">
+            {children}
+        </div>
+    </div>
+);
+
+Head over to AWS AppSync using the AWS Management Console, and open the deployed API.
+
+<!-- ![AWS AppSync](../../static/img/aws-appsync.png) -->
+
+Next, from the sidebar, click on Queries. Let's execute a `getDateTime` query and a
+`pong` mutation. 
+
+## Execute Query.getDateTime
+
+<Row>
+<div className="col col--5">
+
+```graphql title="Operation"
+# GraphQL operation for the
+#   Query.getDateTime resolver
+query {
+    getDateTime
+}
+```
+
+</div>
+<div className="col col--7">
+
+```json title="Result"
+{
+  "data": {
+    "getDateTime": "2021-12-30 08:56:26+0000"
+  }
+}
+```
+
+</div>
+</Row>
+
+
+## Execute Mutation.pong
+
+
+<Row>
+<div className="col col--5">
+
+```graphql title="Operation"
+# GraphQL operation for the
+#   Mutation.pong resolver
+mutation {
+    pong(word: "I am groot")
+}
+```
+
+</div>
+<div className="col col--7">
+
+```json title="Result"
+{
+    "data": {
+        "pong": "toorg ma I"
+    }
+}
+```
+
+</div>
+</Row>
+
+<!-- ![AWS Appsync getDateTime](../../static/img/aws-appsync-getdatetime.png) -->

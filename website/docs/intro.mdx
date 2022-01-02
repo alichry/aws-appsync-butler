@@ -1,0 +1,194 @@
+---
+sidebar_position: 1
+---
+
+# Introduction
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+export const Row = ({ children }) => (
+    <div className="container">
+        <div className="row">
+            {children}
+        </div>
+    </div>
+);
+
+With the power of Apache Velocity, [AWS AppSync](https://aws.amazon.com/appsync/) allows for quick deployment of [GraphQL](https://graphql.org/) APIs. Stored AppSync VTL resolvers require manual instructions
+to associate it with a GraphQL field. For this, AppSync Butler offers a simple development framework to parse and load VTL resolvers into CDK or SST AppSync constructs by leveraging an intuitive directory structure.  
+
+## 🚀  Features
+✨  Simple and intuitive. AppSync Butler is an open and humble framework.   
+   
+💉  Variable injection. Define global variables for replacement in AppSync mapping templates.
+
+🦄  Bind resolvers to data sources from within request mapping templates.  
+  
+🥞  Comaptible with AWS **Cloud Development Kit** and **Serverless Stack Toolkit**.  
+
+## 🤔  How it works
+:::tip
+
+If you're unfamiliar with AWS AppSync, head over to the [AWS AppSync Docs](https://docs.aws.amazon.com/appsync/latest/devguide/what-is-appsync.html).
+
+:::
+With the below GraphQL schema and directory structure, AppSync Butler maps each AppSync Resolver to its corresponding GraphQL field.
+<Row>
+<div className="col col--6">
+
+```graphql
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Query {
+    getPost(id: ID!): Post
+}
+
+type Mutation {
+    addPost(post: PostInput!): Post!
+}
+
+type Post {
+    id: ID!
+    author: Author!
+    title: String!
+    content: String!
+}
+
+type Author {
+    id: ID!
+    username: String!
+}
+```
+
+</div>
+<div className="col col--6">
+
+```tree
+vtl
+├── functions
+│   ├── GetAuthorByAuthorId
+│   │   ├── description.txt
+│   │   ├── request.vtl
+│   │   └── response.vtl
+│   └── GetAuthorIdByPostId
+│       ├── description.txt
+│       ├── request.vtl
+│       └── response.vtl
+└── resolvers
+    ├── Mutation
+    │   └── addPost
+    │       ├── request.vtl
+    │       └── response.vtl
+    ├── Post
+    │   └── author
+    │       ├── after.vtl
+    │       ├── before.vtl
+    │       └── pipeline.seq
+    └── Query
+        └── getPost
+            ├── request.vtl
+            └── response.vtl
+```
+
+</div>
+</Row>
+
+### ✨  Tabular representation
+
+Resolver                        | Resolver Type | GraphQL Type | GraphQL Field
+--------------------------------|---------------|--------------|--------------
+vtl/resolvers/Query/getPost     | Unit          | Query        | getPost
+vtl/resolvers/Mutation/addPost  | Unit          | Mutation     | addPost
+vtl/resolvers/Post/author       | Pipeline      | Post         | author
+
+### 🤖  Functions
+Each subdirectory under `vtl/functions/` should contain the necessary files to build an AppSync VTL function:
+- Request Mapping Template: `request.vtl` 
+- Response Mapping Template: `response.vtl`
+- Description (optional): `description.txt`
+
+When loading functions, AppSync Butler iterates over each function and adds it to the supplied CDK or SST AppSync construct.
+
+### 🧠  Resolvers
+:::info
+
+AppSync Butler supports both **unit** and **pipeline** resolvers.
+
+:::
+Each subdirectory under `vtl/resolvers/` should represent a valid GraphQL type (e.g. `vtl/resolvers/Query`) and contains zero-or-more subdirectories as field-level resolvers (e.g. `vtl/resolver/Query/getPost`). AppSync Butler reads the VTL files in `vtl/resolver/Query/getPost` and adds the `Query.getPost` resolver to the GraphQL API construct.    
+
+#### Unit resolver files
+- Request Mapping Template: `request.vtl`
+- Response Mapping Template: `response.vtl`
+
+#### Pipeline resolver files
+- Before Mapping Template (optional): `before.vtl`
+- Pipeline sequence definition file: `pipeline.seq`
+- After Mapping Template (optional): `after.vtl` 
+ 
+The pipeline sequence defintion file denotes the ordered AppSync VTL functions to execute sequentially using newline-delimitted function names. To execute `vtl/functions/GetUserId` and `vtl/functions/GetUser`, we can define the pipeline sequence defintion file in the following format:
+```
+GetUserId
+GetUser
+```
+AppSync Butler handles the necessary steps to load this pipeline resolver into AppSync.
+
+### ᵡ  Variables
+AppSync Butler parses mapping templates (request, response, before, after) and
+replaces references of a user-defined variable to its specified value.
+Variables are denoted as `{{ var }}`. Variables are defined during the
+[instantialization of a loader](/docs/api/#createloader) or set using
+[`loader.builder.parser.setVariable(key, value)`](/docs/api/classes/Parser#setvariable)
+
+:::danger
+
+AppSync Butler throws an [`UndefinedVariableError`](/docs/api/classes/UndefinedVariableError) if an unrecognized
+variable is encountered in a mapping template.
+
+:::
+
+### 🔮  Data Sources
+Data sources are provided during instantialization and specified directly from
+with-in request mapping templates.
+```json title="/vtl/resolvers/Query/getPost/request.vtl" {1}
+##@butler.dataSource('myDynamoDbDataSource')
+
+{
+    "version": "...",
+    "operation": "GetItem",
+    "key": { ... }
+}
+```
+:::info
+
+Alternatively, the default data source can be provided during instantialization.
+This is highly suitable for Single Table design applications where setting the
+data source is not necessary.
+
+:::
+
+## 🎯  Who's this for
+- Developers utilizing AWS CDK or SST to deploy a GraphQL API.
+- Entrepreneurs leveraging AWS AppSync to define their business logic
+and require a simplistic AppSync development framework with a
+smooth learning curve.
+
+:::tip
+
+As an entrepreneur that is heavily relying on AWS AppSync, it is highly cruicial
+to employ Infrastructure-as-Code tools such as AWS Cloud Development Kit or Serverless
+Stack Toolkit to define your stack as it boosts your product value.
+
+:::
+## 🚘  Forthcoming features
+To support us, give this project a star on [GitHub](https://github.com/alichry/aws-appsync-butler). Here's a list of future objectives that are still under consideration:
+- Provide a, programmable, resolver testing mechanism through deploying a test stack and executing GraphQL
+operations against it. Alternatively, simulating VTL templates yields a zero-cost test suite.
+- VTL validation prior deployment. This would cut-down time spent in errorus deployments.
+- Access properties of other data sources (e.g. a DynamoDB's table name) instead of relying
+on defined variables.
+- Possibly warn users of any missing resolvers for any GraphQL fields.

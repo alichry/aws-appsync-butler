@@ -1,0 +1,10 @@
+{
+    "excludeProtected": true,
+    "excludePrivate": true,
+    "readme": "none",
+    "defaultCategory": "Service",
+    "categoryOrder": ["Service", "*"],
+    "categorizeByGroup": true,
+    "sort": ["visibility", "static-first", "source-order", "alphabetical"],
+    "disableSources": true
+}
