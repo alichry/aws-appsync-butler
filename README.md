@@ -9,4 +9,4 @@ resolvers seamlessly.
 
 ## Documentation
 
-Explore the docs at https://alichry.github.io/aws-appsync-butler/. 
+Explore the documentation of AppSync Butler [here](https://alichry.github.io/aws-appsync-butler). 
