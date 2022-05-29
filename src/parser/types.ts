@@ -2,7 +2,7 @@ import type { ReaderOptions,
     UnitResolverInfo,
     PipelineResolverInfo,
     FunctionInfo
-} from "../reader/types";
+} from "../reader/types.js";
 
 export interface ParsedVtlFile {
     data: string;

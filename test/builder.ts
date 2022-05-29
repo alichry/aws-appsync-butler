@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import _ from 'lodash';
-import { ResolverType } from '../src/reader/types';
-import { ParsedPipelineResolverInfo, ParsedUnitResolverInfo, ParsedFunctionInfo } from '../src/parser/types';
-import Builder from '../src/builder/Builder';
-import { validDefaultStructure, validCustomStructure, validDefaultRoot } from './constants';
+import { ResolverType } from '../src/reader/types.js';
+import { ParsedPipelineResolverInfo, ParsedUnitResolverInfo, ParsedFunctionInfo } from '../src/parser/types.js';
+import Builder from '../src/builder/Builder.js';
+import { validDefaultStructure, validCustomStructure, validDefaultRoot } from './constants.js';
 
 describe('Test VTL builder with default and custom structure', function () {
     const message = "Ciao";

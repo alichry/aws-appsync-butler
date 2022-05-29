@@ -3,14 +3,14 @@ import { readFileSync, readdirSync } from "fs";
 import {
     validateResolverDirectory,
     validateFunctionDirectory
-} from './utils';
+} from './utils.js';
 import type {
     ReaderOptions,
     ResolverInfo,
     FunctionInfo,
     FileInfo
-} from "./types";
-import { ResolverType } from "./types";
+} from "./types.js";
+import { ResolverType } from "./types.js";
 
 /**
  * Resolver and function reader.

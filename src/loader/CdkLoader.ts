@@ -1,5 +1,5 @@
-import Loader from "./Loader";
-import type { CdkLoaderOptions } from "./types";
+import Loader from "./Loader.js";
+import type { CdkLoaderOptions } from "./types.js";
 
 /**
  * Load resolvers into an AppSync GraphQL API construct.

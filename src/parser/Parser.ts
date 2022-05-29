@@ -1,21 +1,21 @@
-import Reader from "../reader/Reader";
+import Reader from "../reader/Reader.js";
 import { ResolverType,
     PipelineResolverInfo,
     UnitResolverInfo
-} from '../reader/types';
+} from '../reader/types.js';
 import { ParserOptions,
     ParsedVtlRequest,
     ParsedVtlFile,
     ParsedResolverInfo,
     ParsedFunctionInfo,
     ParsedUnitResolverInfo,
-    ParsedPipelineResolverInfo
-} from "./types";
-import { VtlFileType } from "./types";
+    ParsedPipelineResolverInfo,
+    VtlFileType
+} from "./types.js";
 import { InvalidDirectiveError,
     UndefinedVariableError,
     PipelineValidationError
-} from "./errors";
+} from "./errors.js";
 
 /**
  * Resolver and function parser.

@@ -1,6 +1,4 @@
-
-
-import type { ParsedResolverInfo } from "../parser/types";
+import type { ParsedResolverInfo } from "../parser/types.js";
 
 /**
  * The resolver tree is a two-dimensional object with keys as GraphQL types and

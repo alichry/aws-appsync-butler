@@ -1,4 +1,4 @@
-export { default as Reader } from './Reader';
+export { default as Reader } from './Reader.js';
 export {
     ReaderOptions,
     ResolverInfo,
@@ -10,5 +10,5 @@ export {
     UnitDirectoryStructure,
     PipelineDirectoryStructure,
     FileInfo
-} from './types';
-export { DirectoryValidationError } from './errors';
+} from './types.js';
+export { DirectoryValidationError } from './errors.js';

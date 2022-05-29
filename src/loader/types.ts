@@ -1,6 +1,6 @@
-import type { GraphqlApi, BaseDataSource } from '@aws-cdk/aws-appsync';
+import type { GraphqlApi, BaseDataSource } from '@aws-cdk/aws-appsync-alpha';
 import type { AppSyncApi as SstAppSyncApi } from '@serverless-stack/resources';
-import { ParserOptions } from '../parser/types';
+import { ParserOptions } from '../parser/types.js';
 
 export type DataSource = BaseDataSource | string;
 

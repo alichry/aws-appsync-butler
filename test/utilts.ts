@@ -1,10 +1,10 @@
-import { createLoader } from '../src/loader/utils';
 import * as sst from "@serverless-stack/resources";
-import * as cdk from '@aws-cdk/core';
-import { Table, AttributeType } from '@aws-cdk/aws-dynamodb';
-import { GraphqlApi } from '@aws-cdk/aws-appsync';
-import { ReaderOptions } from '../src/reader/types';
-import { CdkLoaderOptions, SstLoaderOptions } from '../src/loader/types';
+import * as cdk from 'aws-cdk-lib';
+import { Table, AttributeType } from 'aws-cdk-lib/aws-dynamodb';
+import { GraphqlApi } from '@aws-cdk/aws-appsync-alpha';
+import { createLoader } from '../src/loader/utils.js';
+import { ReaderOptions } from '../src/reader/types.js';
+import { CdkLoaderOptions, SstLoaderOptions } from '../src/loader/types.js';
 
 class SstDummyStack extends sst.Stack {}
 class CdkDummyStack extends cdk.Stack {}
@@ -13,20 +13,24 @@ const createSstDummyStackAndAppsyncApi = () => {
     const app = new sst.App();
     const dummyStack = new SstDummyStack(app, "dummy-stack");
     const table = new sst.Table(dummyStack, "dynamodb-table", {
-        fields: { pk: sst.TableFieldType.STRING, sk: sst.TableFieldType.STRING },
+        fields: { pk: "string", sk: "string" },
         primaryIndex: { partitionKey: "pk", sortKey: "sk" }
     });
     const secondaryTable = new sst.Table(dummyStack, "dynamodb-table2", {
-        fields: { pk: sst.TableFieldType.STRING, sk: sst.TableFieldType.STRING },
+        fields: { pk: "string", sk: "string" },
         primaryIndex: { partitionKey: "pk", sortKey: "sk" }
     });
     const api = new sst.AppSyncApi(dummyStack, "appsync-api", {
-        dataSources: { myTable: { table }, test: { table: secondaryTable } }
+        dataSources: {
+            myTable: { type: "dynamodb", table },
+            test: { type: "dynamodb", table: secondaryTable }
+        }
     });
-    return { dummyStack,
+    return {
+        dummyStack,
         api: api,
-        dynamoDbTable: table.dynamodbTable,
-        secondaryDynamoDbTable: secondaryTable.dynamodbTable
+        dynamoDbTable: table.cdk.table,
+        secondaryDynamoDbTable: secondaryTable.cdk.table
     };
 }
 

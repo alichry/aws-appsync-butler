@@ -1,8 +1,8 @@
-import CdkLoader from "./CdkLoader";
-import SstLoader from "./SstLoader";
-import type { CdkLoaderOptions, SstLoaderOptions } from "./types";
-import { GraphqlApi } from '@aws-cdk/aws-appsync';
-import type { Construct } from "@aws-cdk/core";
+import { GraphqlApi } from '@aws-cdk/aws-appsync-alpha';
+import type { Construct } from 'constructs'
+import CdkLoader from "./CdkLoader.js";
+import SstLoader from "./SstLoader.js";
+import type { CdkLoaderOptions, SstLoaderOptions } from "./types.js";
 
 /**
  * Instantialize a CDK Loader instance

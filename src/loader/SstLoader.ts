@@ -1,7 +1,7 @@
-import Loader from "./Loader";
-import type { SstLoaderOptions } from "./types";
-import { ResolverType } from '../reader/types';
-import { ParsedResolverInfo } from "../parser/types";
+import Loader from "./Loader.js";
+import type { SstLoaderOptions } from "./types.js";
+import { ResolverType } from '../reader/types.js';
+import { ParsedResolverInfo } from "../parser/types.js";
 
 /**
  * Load resolvers into an SST AppSyncAPI construct.
@@ -42,10 +42,10 @@ export default class SstLoader extends Loader<SstLoaderOptions> {
             }
         }
         const resolverProps = this.getResolverProps(resolver);
-        this.api.addResolvers(this.scope, {
+        this.api.addResolvers(this .scope, {
             [`${resolver.typeName} ${resolver.fieldName}`]: {
                 dataSource,
-                resolverProps
+                cdk: { resolver: resolverProps }
             }
         });
     }

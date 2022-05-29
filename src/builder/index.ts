@@ -1,2 +1,2 @@
-export { default as Builder } from './Builder';
-export { ResolverTree } from './types';
+export { default as Builder } from './Builder.js';
+export { ResolverTree } from './types.js';

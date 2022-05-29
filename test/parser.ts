@@ -1,10 +1,10 @@
 import { expect } from 'chai';
 import _ from 'lodash';
-import Parser from '../src/parser/Parser';
-import { ParsedPipelineResolverInfo, ParsedUnitResolverInfo } from '../src/parser/types';
-import { InvalidDirectiveError, PipelineValidationError, UndefinedVariableError } from '../src/parser/errors';
-import { ResolverType } from '../src/reader/types';
-import { invalidCustomStructure, validDefaultStructure, validCustomStructure, invalidDefaultRoot, validDefaultRoot } from './constants';
+import Parser from '../src/parser/Parser.js';
+import { ParsedPipelineResolverInfo, ParsedUnitResolverInfo } from '../src/parser/types.js';
+import { InvalidDirectiveError, PipelineValidationError, UndefinedVariableError } from '../src/parser/errors.js';
+import { ResolverType } from '../src/reader/types.js';
+import { invalidCustomStructure, validDefaultStructure, validCustomStructure, invalidDefaultRoot, validDefaultRoot } from './constants.js';
 
 describe('Test parser validations with default and custom structures', function () {
     const parsers = [
