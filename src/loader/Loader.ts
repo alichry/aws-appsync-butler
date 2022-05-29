@@ -1,19 +1,19 @@
-import Builder from "../builder/Builder";
 import { 
     GraphqlApi,
     BaseDataSource,
     MappingTemplate,
-    AppsyncFunction
-} from '@aws-cdk/aws-appsync';
+    AppsyncFunction,
+    BaseResolverProps,
+} from '@aws-cdk/aws-appsync-alpha';
 import { 
-    AppSyncApi as SstAppSyncApi,
-    AppSyncApiCdkResolverProps
+    AppSyncApi as SstAppSyncApi
 } from '@serverless-stack/resources';
-import type { Construct } from "@aws-cdk/core";
-import type { LoaderOptions, DataSource, SstLoaderOptions } from "./types";
-import { ResolverType } from "../reader/types";
-import { ParsedFunctionInfo, ParsedResolverInfo, ParsedUnitResolverInfo } from '../parser/types';
-import { DataSourceNotFoundError, FunctionNotFoundError } from "./errors";
+import type { Construct } from "constructs";
+import Builder from "../builder/Builder.js";
+import type { LoaderOptions, DataSource, SstLoaderOptions } from "./types.js";
+import { ResolverType } from "../reader/types.js";
+import { ParsedFunctionInfo, ParsedResolverInfo, ParsedUnitResolverInfo } from '../parser/types.js';
+import { DataSourceNotFoundError, FunctionNotFoundError } from "./errors.js";
 
 export default abstract class Loader<Options extends LoaderOptions> {
     
@@ -128,7 +128,7 @@ export default abstract class Loader<Options extends LoaderOptions> {
 
     protected getResolverProps(
         resolver: ParsedResolverInfo
-    ): AppSyncApiCdkResolverProps {
+    ): Omit<BaseResolverProps, "fieldName" | "typeName"> {
         if (resolver.resolverType === ResolverType.Unit) {
             return {
                 requestMappingTemplate: MappingTemplate.fromString(resolver.requestMappingTemplate.data),
@@ -242,7 +242,7 @@ export default abstract class Loader<Options extends LoaderOptions> {
 
     private getGraphqlApi(): GraphqlApi {
         if (this.api instanceof SstAppSyncApi) {
-            return this.api.graphqlApi;
+            return this.api.cdk.graphqlApi;
         }
         return this.api;
     }

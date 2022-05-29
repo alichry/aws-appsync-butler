@@ -1,4 +1,4 @@
-export { default as Parser } from './Parser';
+export { default as Parser } from './Parser.js';
 export {
     ParsedFunctionInfo,
     ParsedPipelineResolverInfo,
@@ -7,9 +7,9 @@ export {
     ParserOptions,
     ParsedVtlFile,
     ParsedVtlRequest
-} from './types';
+} from './types.js';
 export {
     PipelineValidationError,
     UndefinedVariableError,
     InvalidDirectiveError
-} from './errors';
+} from './errors.js';

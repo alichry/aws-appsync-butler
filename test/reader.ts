@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import _ from 'lodash';
-import Reader from '../src/reader/Reader';
-import { DirectoryValidationError } from '../src/reader/errors';
-import { PipelineResolverInfo, ResolverType, UnitResolverInfo } from '../src/reader/types';
-import { invalidCustomStructure, validDefaultStructure, validCustomStructure, invalidDefaultRoot, validDefaultRoot } from './constants';
+import Reader from '../src/reader/Reader.js';
+import { DirectoryValidationError } from '../src/reader/errors.js';
+import { PipelineResolverInfo, ResolverType, UnitResolverInfo } from '../src/reader/types.js';
+import { invalidCustomStructure, validDefaultStructure, validCustomStructure, invalidDefaultRoot, validDefaultRoot } from './constants.js';
 
 describe('Test VTL directory validation with default and custom structures', function () {
     const readers = [

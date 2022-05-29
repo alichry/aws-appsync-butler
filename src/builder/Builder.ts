@@ -1,9 +1,9 @@
-import type { ResolverTree } from "./types";
+import type { ResolverTree } from "./types.js";
 import type { ParsedResolverInfo,
     ParsedFunctionInfo,
     ParserOptions
-} from '../parser/types';
-import Parser from "../parser/Parser";
+} from '../parser/types.js';
+import Parser from "../parser/Parser.js";
 
 /**
  * Build a resolver tree from a VTL directory.

@@ -1,6 +1,6 @@
 import { readdirSync } from 'fs';
-import { DirectoryFileDefinition, ResolverDirectoryFlags } from "./types";
-import { DirectoryValidationError } from "./errors";
+import { DirectoryFileDefinition, ResolverDirectoryFlags } from "./types.js";
+import { DirectoryValidationError } from "./errors.js";
 
 /**
  * Validates a resolver directory path and return its files.

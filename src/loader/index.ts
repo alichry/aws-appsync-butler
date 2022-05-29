@@ -1,14 +1,14 @@
-export { createLoader } from './utils';
-export { default as CdkLoader } from './CdkLoader';
-export { default as SstLoader } from './SstLoader';
+export { createLoader } from './utils.js';
+export { default as CdkLoader } from './CdkLoader.js';
+export { default as SstLoader } from './SstLoader.js';
 export {
     LoaderOptions,
     DataSource,
     SstLoaderOptions,
     CdkLoaderOptions
-} from './types';
+} from './types.js';
 export {
     DataSourceTypeMismatchError,
     DataSourceNotFoundError,
     FunctionNotFoundError
-} from './errors';
+} from './errors.js';

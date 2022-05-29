@@ -1,13 +1,14 @@
 import { expect } from 'chai';
-import { Template, Match } from '@aws-cdk/assertions';
-import { CfnDataSource, GraphqlApi } from '@aws-cdk/aws-appsync';
-import _ from 'lodash';
-import { ParsedPipelineResolverInfo, ParsedUnitResolverInfo } from '../src/parser/types';
-import { loadCdk, loadSst } from './utilts';
+import { Template, Match } from 'aws-cdk-lib/assertions';
+import { CfnDataSource } from 'aws-cdk-lib/aws-appsync';
+import { GraphqlApi } from '@aws-cdk/aws-appsync-alpha';
 import { AppSyncApi as SstAppSyncApi } from '@serverless-stack/resources';
-import ValidationError from '../src/ValidationError';
-import { invalidCustomStructure, invalidDefaultRoot, validCustomStructure, validDefaultRoot } from './constants';
-import { DataSourceNotFoundError } from '../src/loader/errors';
+import _ from 'lodash';
+import { ParsedPipelineResolverInfo, ParsedUnitResolverInfo } from '../src/parser/types.js';
+import { loadCdk, loadSst } from './utilts.js';
+import ValidationError from '../src/ValidationError.js';
+import { invalidCustomStructure, invalidDefaultRoot, validCustomStructure, validDefaultRoot } from './constants.js';
+import { DataSourceNotFoundError } from '../src/loader/errors.js';
 
 const message = "Ciao";
 const validCases = [
@@ -86,7 +87,7 @@ describe('Test VTL loading into SST and CDK using default and custom structures'
                 const { dummyStack, api, loader } = ias === "SST" ? loadSst(options) : loadCdk(options);
                 let graphqlApi: GraphqlApi;
                 if (api instanceof SstAppSyncApi) {
-                    graphqlApi = api.graphqlApi;
+                    graphqlApi = api.cdk.graphqlApi;
                     expect(api.getResolver("Variable pipeline")).to.exist;
                     expect(api.getResolver("Variable unit")).to.exist;
                 } else {
@@ -131,7 +132,7 @@ describe('Test VTL loading into SST and CDK using default and custom structures'
 
             it(`Should load functions into ${ias} (${type})`, function () {
                 const { dummyStack, api, loader, dynamoDbTable, secondaryDynamoDbTable } = ias === "SST" ? loadSst(options) : loadCdk(options);
-                const graphqlApi = api instanceof SstAppSyncApi ? api.graphqlApi : api;
+                const graphqlApi = api instanceof SstAppSyncApi ? api.cdk.graphqlApi : api;
                 const template = Template.fromStack(dummyStack);
                 const hwFn = loader.functions.HelloWorld!;
                 const hw = loader.builder.functions.HelloWorld!;
@@ -238,7 +239,7 @@ describe('Test VTL loading into SST and CDK using default and custom structures'
                         defaultFunctionDataSource: 'none',
                     });
                 }
-                const graphqlApi = beans.api instanceof SstAppSyncApi ? beans.api.graphqlApi : beans.api;
+                const graphqlApi = beans.api instanceof SstAppSyncApi ? beans.api.cdk.graphqlApi : beans.api;
                 const template = Template.fromStack(beans.dummyStack);
                 template.resourceCountIs('AWS::AppSync::DataSource', 3);
                 template.hasResourceProperties('AWS::AppSync::DataSource', {
@@ -271,7 +272,7 @@ describe('Test VTL loading into SST and CDK using default and custom structures'
                         defaultUnitResolverDataSource: 'none',
                     });
                 }
-                const graphqlApi = beans.api instanceof SstAppSyncApi ? beans.api.graphqlApi : beans.api;
+                const graphqlApi = beans.api instanceof SstAppSyncApi ? beans.api.cdk.graphqlApi : beans.api;
                 const template = Template.fromStack(beans.dummyStack);
                 template.resourceCountIs('AWS::AppSync::DataSource', 3);
                 template.hasResourceProperties('AWS::AppSync::DataSource', {
